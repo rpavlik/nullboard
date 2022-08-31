@@ -1720,6 +1720,41 @@
 
 <script type="text/javascript">
 
+	function Note(text) {
+		this.text = text;
+		this.raw = false;
+		this.min = false;
+	}
+
+	function List(title) {
+		this.title = title;
+		this.notes = [];
+
+		this.addNote = function (text) {
+			var x = new Note(text);
+			this.notes.push(x);
+			return x;
+		}
+	}
+
+	function Board(title) {
+		this.format = NB.blobVersion;
+		this.id = +new Date();
+		this.revision = 0;
+		this.title = title || '';
+		this.lists = [];
+
+		this.addList = function (title) {
+			var x = new List(title);
+			this.lists.push(x);
+			return x;
+		}
+	}
+
+</script>
+
+<script type="text/javascript">
+
 	function AppConfig()
 	{
 		this.verLast      = null;           // last used codeVersion
@@ -2126,9 +2161,6 @@
 		initBackups(onBackupStatus)
 		{
 			var self = this;
-			var pending = 0;
-			var success = true;
-			var store_id = 1;
 
 			self.backups.agents = [];
 
@@ -2230,7 +2262,7 @@
 				});
 			});
 		}
-	};
+	}
 
 	class Storage_Local extends Storage
 	{
@@ -2308,7 +2340,7 @@
 				var board_id = parseInt(m[1]);
 				var meta = this.getJson('board.' + board_id + '.meta');
 
-				if (! meta.hasOwnProperty('history'))
+				if (! Object.prototype.hasOwnProperty(meta, 'history'))
 				{
 					console.log( `Invalid meta for board ${board_id}` );
 					continue;
@@ -2334,26 +2366,26 @@
 
 			// old format
 
-			for (var i=0; i<localStorage.length; i++)
+			for (var old_i=0; old_i<localStorage.length; old_i++)
 			{
-				var k = localStorage.key(i);
-				var m = k.match(/^nullboard\.board\.(\d+)$/);
+				var old_k = localStorage.key(old_i);
+				var old_m = old_k.match(/^nullboard\.board\.(\d+)$/);
 
-				if (! m)
+				if (! old_m)
 					continue;
 
 				newInstall = false;
 
-				var board_id = parseInt(m[1]);
-				if (this.boardIndex.has(board_id))
+				var old_board_id = parseInt(old_m[1]);
+				if (this.boardIndex.has(old_board_id))
 					continue;
 
-				var meta = this.rebuildMeta(board_id);
+				var old_meta = this.rebuildMeta(old_board_id);
 				if (! meta)
 					continue;
 
-				meta = Object.assign(new BoardMeta(), meta);
-				this.boardIndex.set(board_id, meta);
+				old_meta = Object.assign(new BoardMeta(), old_meta);
+				this.boardIndex.set(old_board_id, old_meta);
 			}
 
 			this.fixupConfig(newInstall);
@@ -2606,45 +2638,12 @@
 
 <script type="text/javascript">
 
-	function Note(text)
+
+	function removeTextSelection()
 	{
-		this.text = text;
-		this.raw  = false;
-		this.min  = false;
+		if (window.getSelection) { window.getSelection().removeAllRanges(); }
+		else if (document.selection) { document.selection.empty(); }
 	}
-
-	function List(title)
-	{
-		this.title = title;
-		this.notes = [ ];
-
-		this.addNote = function(text)
-		{
-			var x = new Note(text);
-			this.notes.push(x);
-			return x;
-		}
-	}
-
-	function Board(title)
-	{
-		this.format   = NB.blobVersion;
-		this.id       = +new Date();
-		this.revision = 0;
-		this.title    = title || '';
-		this.lists    = [ ];
-
-		this.addList = function(title)
-		{
-			var x = new List(title);
-			this.lists.push(x);
-			return x;
-		}
-	}
-
-</script>
-
-<script type="text/javascript">
 
 	function Drag2()
 	{
@@ -3437,7 +3436,6 @@
 
 		if (! NB.board)
 		{
-			var index = NB.storage.getBoardIndex();
 			var all = [];
 
 			boards.forEach(function(meta, board_id){
@@ -3465,7 +3463,7 @@
 		var props = [ 'format', 'id', 'revision', 'title', 'lists' ];
 
 		for (var i=0; i<props.length; i++)
-			if (! foo.hasOwnProperty(props[i]))
+			if (! Object.prototype.hasOwnProperty(foo, props[i]))
 				return "Required board properties are missing.";
 
 		if (! foo.id || ! foo.revision || ! Array.isArray(foo.lists))
@@ -4049,7 +4047,7 @@
 		{
 			var xmmm = /`(.*?)`/mg;
 			text = text.replace(xmmm, function(full, text){
-				link = 'file:///' + text.replace('\\', '/');
+				var link = 'file:///' + text.replace('\\', '/');
 				return '`<a href="' + link + '" target=_blank>' + text + '</a>`';
 			});
 		}
@@ -4060,12 +4058,6 @@
 	function getText($note)
 	{
 		return $note.attr('_text');
-	}
-
-	function removeTextSelection()
-	{
-		if (window.getSelection) { window.getSelection().removeAllRanges(); }
-		else if (document.selection) { document.selection.empty(); }
 	}
 
 	function shakeControl($x)
@@ -4508,7 +4500,7 @@
 
 	function getLineHeight()
 	{
-		return getVar('--lh');;
+		return getVar('--lh');
 	}
 
 	function getListWidth()
