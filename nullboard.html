@@ -2345,7 +2345,7 @@
 				var board_id = parseInt(m[1]);
 				var meta = this.getJson('board.' + board_id + '.meta');
 
-				if (! Object.prototype.hasOwnProperty(meta, 'history'))
+				if (! meta.hasOwnProperty('history'))
 				{
 					console.log( `Invalid meta for board ${board_id}` );
 					continue;
@@ -3468,7 +3468,7 @@
 		var props = [ 'format', 'id', 'revision', 'title', 'lists' ];
 
 		for (var i=0; i<props.length; i++)
-			if (! Object.prototype.hasOwnProperty(foo, props[i]))
+			if (! foo.hasOwnProperty(props[i]))
 				return "Required board properties are missing.";
 
 		if (! foo.id || ! foo.revision || ! Array.isArray(foo.lists))
